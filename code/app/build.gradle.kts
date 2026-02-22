@@ -36,6 +36,21 @@ android {
     }
 }
 
+tasks.register<Javadoc>("generateReleaseJavadoc") {
+    val ext = project.extensions.getByType<com.android.build.gradle.AppExtension>()
+    source = project.files(ext.sourceSets["main"].java.srcDirs).asFileTree
+    setDestinationDir(file("${rootProject.rootDir.parentFile}/doc/javadoc"))
+    exclude("**/R.java", "**/BuildConfig.java")
+    options {
+        encoding = "UTF-8"
+    }
+    doFirst {
+        val releaseVariant = ext.applicationVariants.first { it.name == "release" }
+        classpath = project.files(releaseVariant.javaCompileProvider.get().classpath.files) +
+                project.files(ext.bootClasspath)
+    }
+}
+
 dependencies {
     implementation(libs.appcompat)
     implementation(libs.material)
